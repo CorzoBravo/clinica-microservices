@@ -1,0 +1,45 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:15
+    container_name: clinica-postgres
+    environment:
+      POSTGRES_USER: clinica_user
+      POSTGRES_PASSWORD: clinica_password
+      POSTGRES_DB: clinica_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    restart: unless-stopped
+
+  user-service:
+    build:
+      context: ./user-service
+    container_name: clinica-user-service
+    environment:
+      - PORT=3001
+      - DATABASE_URL=postgresql://clinica_user:clinica_password@postgres:5432/clinica_db?schema=public
+      - JWT_SECRET=super_secret_jwt_key_cambiar_en_produccion
+    ports:
+      - "3001:3001"
+    depends_on:
+      - postgres
+    restart: unless-stopped
+
+  api-gateway:
+    build:
+      context: ./api-gateway
+    container_name: clinica-api-gateway
+    environment:
+      - PORT=3000
+      - USER_SERVICE_URL=http://user-service:3001
+    ports:
+      - "3000:3000"
+    depends_on:
+      - user-service
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
