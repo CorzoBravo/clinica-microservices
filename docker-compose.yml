@@ -35,10 +35,24 @@ services:
     environment:
       - PORT=3000
       - USER_SERVICE_URL=http://user-service:3001
+      - APPOINTMENT_SERVICE_URL=http://appointment-service:8000
     ports:
       - "3000:3000"
     depends_on:
       - user-service
+      - appointment-service
+    restart: unless-stopped
+
+  appointment-service:
+    build:
+      context: ./appointment-service
+    container_name: clinica-appointment-service
+    environment:
+      - DATABASE_URL=postgresql://clinica_user:clinica_password@postgres:5432/clinica_db
+    ports:
+      - "8000:8000"
+    depends_on:
+      - postgres
     restart: unless-stopped
 
 volumes:
