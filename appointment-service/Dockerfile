@@ -1,15 +1,29 @@
-FROM python:3.10-slim
+FROM node:18-alpine AS builder
 
-WORKDIR /app
+WORKDIR /usr/src/app
 
-# Instalar dependencias del sistema necesarias para compilar psycopg2
-RUN apt-get update && apt-get install -y libpq-dev gcc && rm -rf /var/lib/apt/lists/*
+RUN apk add --no-cache openssl
 
-COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+COPY package*.json ./
+RUN npm install
 
 COPY . .
+RUN npx prisma generate
+RUN npm run build
+
+FROM node:18-alpine
+
+WORKDIR /usr/src/app
+
+RUN apk add --no-cache openssl
+
+COPY package*.json ./
+RUN npm install --production
+
+COPY --from=builder /usr/src/app/dist ./dist
+COPY --from=builder /usr/src/app/node_modules/@prisma ./node_modules/@prisma
+COPY prisma ./prisma
 
 EXPOSE 8000
 
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
+CMD ["sh", "-c", "npx prisma db push && npm start"]

@@ -48,7 +48,7 @@ services:
       context: ./appointment-service
     container_name: clinica-appointment-service
     environment:
-      - DATABASE_URL=postgresql://clinica_user:clinica_password@postgres:5432/clinica_db
+      - DATABASE_URL=postgresql://clinica_user:clinica_password@postgres:5432/clinica_db?schema=appointments
     ports:
       - "8000:8000"
     depends_on:

@@ -1,23 +1,28 @@
-FROM node:18-alpine
-
-RUN apk add --no-cache openssl
+FROM node:18-alpine AS builder
 
 WORKDIR /usr/src/app
 
-# Copiamos primero package.json
-COPY package*.json ./
+RUN apk add --no-cache openssl
 
-# Instalamos dependencias
+COPY package*.json ./
 RUN npm install
 
-# Copiamos el resto de los archivos, incluyendo el schema de prisma
 COPY . .
-
-# Generamos el cliente de Prisma
 RUN npx prisma generate
+RUN npm run build
 
-# Exponemos el puerto
+FROM node:18-alpine
+WORKDIR /usr/src/app
+
+RUN apk add --no-cache openssl
+
+COPY package*.json ./
+RUN npm install --production
+
+COPY --from=builder /usr/src/app/dist ./dist
+COPY --from=builder /usr/src/app/node_modules/@prisma ./node_modules/@prisma
+COPY prisma ./prisma
+
 EXPOSE 3001
 
-# Ejecutamos las migraciones (solo para desarrollo/demo, en prod se maneja distinto) y luego levantamos
 CMD ["sh", "-c", "npx prisma db push && npm start"]
