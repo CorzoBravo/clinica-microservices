@@ -18,6 +18,10 @@ app.use(errorHandler);
 
 const PORT = process.env.PORT || 8000;
 
-app.listen(PORT, () => {
-  console.log(`Appointment Service escuchando en el puerto ${PORT}`);
-});
+if (require.main === module) {
+  app.listen(PORT, () => {
+    console.log(`Appointment Service escuchando en el puerto ${PORT}`);
+  });
+}
+
+export default app;
