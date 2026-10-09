@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { createAppointment, getAppointments, updateStatus } from '../controllers/appointment.controller';
+import { createAppointment, getAppointments, getAppointmentById, updateStatus } from '../controllers/appointment.controller';
 import { validate } from '../middlewares/validate.middleware';
 import { z } from 'zod';
 
@@ -20,8 +20,11 @@ const updateStatusSchema = z.object({
   }),
 });
 
-router.post('/', validate(createSchema), createAppointment);
-router.get('/', getAppointments);
-router.patch('/:id/status', validate(updateStatusSchema), updateStatus);
+import { authenticateJWT } from '../middlewares/auth.middleware';
+
+router.post('/', authenticateJWT, validate(createSchema), createAppointment);
+router.get('/', authenticateJWT, getAppointments);
+router.get('/:id', authenticateJWT, getAppointmentById);
+router.patch('/:id/status', authenticateJWT, validate(updateStatusSchema), updateStatus);
 
 export default router;

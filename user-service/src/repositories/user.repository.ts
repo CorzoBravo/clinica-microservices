@@ -13,4 +13,12 @@ export class UserRepository {
   async findById(id: number): Promise<User | null> {
     return prisma.user.findUnique({ where: { id } });
   }
+
+  async findMany(filters?: any): Promise<User[]> {
+    return prisma.user.findMany({ where: filters });
+  }
+
+  async update(id: number, data: Prisma.UserUpdateInput): Promise<User> {
+    return prisma.user.update({ where: { id }, data });
+  }
 }

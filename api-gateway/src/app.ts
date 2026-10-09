@@ -1,6 +1,6 @@
 import express from 'express';
 import cors from 'cors';
-import proxy from 'express-http-proxy';
+import { createProxyMiddleware } from 'http-proxy-middleware';
 
 const app = express();
 app.use(cors());
@@ -9,16 +9,19 @@ const PORT = process.env.PORT || 3000;
 const USER_SERVICE_URL = process.env.USER_SERVICE_URL || 'http://localhost:3001';
 const APPOINTMENT_SERVICE_URL = process.env.APPOINTMENT_SERVICE_URL || 'http://localhost:8000';
 
-
-app.use('/api/users', proxy(USER_SERVICE_URL, {
-  proxyReqPathResolver: (req) => {
-    return req.url;
+app.use('/api/users', createProxyMiddleware({
+  target: USER_SERVICE_URL,
+  changeOrigin: true,
+  pathRewrite: {
+    '^/api/users': ''
   }
 }));
 
-app.use('/api/appointments', proxy(APPOINTMENT_SERVICE_URL, {
-  proxyReqPathResolver: (req) => {
-    return req.url;
+app.use('/api/appointments', createProxyMiddleware({
+  target: APPOINTMENT_SERVICE_URL,
+  changeOrigin: true,
+  pathRewrite: {
+    '^/api/appointments': ''
   }
 }));
 

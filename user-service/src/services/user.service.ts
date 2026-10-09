@@ -3,10 +3,9 @@ import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 
 const userRepository = new UserRepository();
-const JWT_SECRET = process.env.JWT_SECRET || 'fallback_secret';
 
 export class UserService {
-  async register(data: any) {
+  async register(data: any, requestorRole?: string) {
     const existingUser = await userRepository.findByEmail(data.email);
     if (existingUser) {
       const error: any = new Error('El usuario ya existe');
@@ -14,11 +13,18 @@ export class UserService {
       throw error;
     }
 
+    // Force role to PACIENTE if not created by ADMIN
+    let finalRole: any = 'PACIENTE';
+    if (requestorRole === 'ADMIN' && data.role) {
+      finalRole = data.role;
+    }
+
     const hashedPassword = await bcrypt.hash(data.password, 10);
     const newUser = await userRepository.create({
       email: data.email,
       password: hashedPassword,
-      role: data.role || 'PACIENTE',
+      name: data.name || null,
+      role: finalRole,
     });
 
     const { password, ...userWithoutPassword } = newUser;
@@ -40,12 +46,38 @@ export class UserService {
       throw error;
     }
 
+    const jwtSecret = process.env.JWT_SECRET;
+    if (!jwtSecret) {
+      throw new Error('JWT_SECRET is missing');
+    }
+
     const token = jwt.sign(
       { userId: user.id, email: user.email, role: user.role },
-      JWT_SECRET,
+      jwtSecret,
       { expiresIn: '24h' }
     );
 
     return { message: 'Login exitoso', token, role: user.role };
+  }
+
+  async getAll(roleFilter?: string) {
+    const filters = roleFilter ? { role: roleFilter } : {};
+    const users = await userRepository.findMany(filters);
+    return users.map(({ password, ...user }) => user);
+  }
+
+  async getDoctors() {
+    const doctors = await userRepository.findMany({ role: 'MEDICO' });
+    return doctors.map(doc => ({ id: doc.id, email: doc.email, name: doc.name }));
+  }
+
+  async update(id: number, data: any) {
+    // Prevent updating password through this simple endpoint for now, or hash it if needed
+    if (data.password) {
+      data.password = await bcrypt.hash(data.password, 10);
+    }
+    const updatedUser = await userRepository.update(id, data);
+    const { password, ...userWithoutPassword } = updatedUser;
+    return userWithoutPassword;
   }
 }

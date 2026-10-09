@@ -21,6 +21,10 @@ export class AppointmentService {
     return await appointmentRepository.findMany(filters);
   }
 
+  async getById(id: number) {
+    return await appointmentRepository.findById(id);
+  }
+
   async updateStatus(id: number, status: AppointmentStatus) {
     const appointment = await appointmentRepository.findById(id);
     if (!appointment) {
@@ -28,6 +32,21 @@ export class AppointmentService {
       error.status = 404;
       throw error;
     }
+
+    const currentStatus = appointment.status;
+
+    const validTransitions: Record<string, string[]> = {
+      'SCHEDULED': ['COMPLETED', 'CANCELLED'],
+      'COMPLETED': [],
+      'CANCELLED': []
+    };
+
+    if (!validTransitions[currentStatus]?.includes(status)) {
+      const error: any = new Error(`Transición de estado no válida de ${currentStatus} a ${status}`);
+      error.status = 400;
+      throw error;
+    }
+
     return await appointmentRepository.update(id, { status });
   }
 }
