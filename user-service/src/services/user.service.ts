@@ -71,12 +71,14 @@ export class UserService {
     return doctors.map(doc => ({ id: doc.id, email: doc.email, name: doc.name }));
   }
 
-  async update(id: number, data: any) {
-    // Prevent updating password through this simple endpoint for now, or hash it if needed
-    if (data.password) {
-      data.password = await bcrypt.hash(data.password, 10);
-    }
-    const updatedUser = await userRepository.update(id, data);
+  // P0-5: Solo permite actualizar campos whitelisted (name, email).
+  // La contraseña y rol requieren flujos y endpoints dedicados.
+  async update(id: number, data: { name?: string; email?: string }) {
+    const updateData: { name?: string; email?: string } = {};
+    if (data.name !== undefined) updateData.name = data.name;
+    if (data.email !== undefined) updateData.email = data.email;
+
+    const updatedUser = await userRepository.update(id, updateData);
     const { password, ...userWithoutPassword } = updatedUser;
     return userWithoutPassword;
   }

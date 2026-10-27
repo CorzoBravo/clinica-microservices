@@ -1,11 +1,11 @@
+import './config/env';
 import express from 'express';
-import cors from 'cors';
 import appointmentRoutes from './routes/appointment.routes';
 import { errorHandler } from './middlewares/error.middleware';
 
 const app = express();
 
-app.use(cors());
+// CORS se delega exclusivamente al API Gateway en el borde para evitar cabeceras duplicadas
 app.use(express.json());
 
 app.use('/', appointmentRoutes);

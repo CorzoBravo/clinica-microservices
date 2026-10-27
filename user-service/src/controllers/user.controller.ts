@@ -1,9 +1,8 @@
 import { Request, Response, NextFunction } from 'express';
 import { UserService } from '../services/user.service';
+import { AuthRequest } from '../middlewares/auth.middleware';
 
 const userService = new UserService();
-
-import { AuthRequest } from '../middlewares/auth.middleware';
 
 export const registerUser = async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
@@ -45,6 +44,9 @@ export const getDoctors = async (req: Request, res: Response, next: NextFunction
 export const updateUser = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const userId = parseInt(req.params.id, 10);
+    if (isNaN(userId)) {
+      return res.status(400).json({ error: 'ID de usuario inválido' });
+    }
     const updatedUser = await userService.update(userId, req.body);
     res.status(200).json({ message: 'Usuario actualizado', user: updatedUser });
   } catch (error) {
