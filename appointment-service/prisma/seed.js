@@ -1,14 +1,13 @@
-import { PrismaClient } from '@prisma/client';
+const { PrismaClient } = require('@prisma/client');
 
 const prisma = new PrismaClient();
 
 async function main() {
   console.log('🌱 [appointment-service] Iniciando carga de datos iniciales (Seed)...');
 
-  // Limpiar citas previas para pruebas limpias
+  // Limpiar citas previas
   await prisma.appointment.deleteMany({});
 
-  // Fechas relativas
   const todayAt10 = new Date();
   todayAt10.setHours(10, 0, 0, 0);
 

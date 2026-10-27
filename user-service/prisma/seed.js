@@ -1,12 +1,12 @@
-import { PrismaClient } from '@prisma/client';
-import bcrypt from 'bcrypt';
+const { PrismaClient } = require('@prisma/client');
+const bcrypt = require('bcrypt');
 
 const prisma = new PrismaClient();
 
 async function main() {
   console.log('🌱 [user-service] Iniciando carga de datos iniciales (Seed)...');
 
-  // Limpiar usuarios previos para evitar duplicados en seed fresco
+  // Limpiar usuarios previos
   await prisma.user.deleteMany({});
 
   const passwordHashAdmin = await bcrypt.hash('admin123', 10);
