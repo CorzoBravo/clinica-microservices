@@ -6,9 +6,9 @@ services:
       POSTGRES_USER: ${POSTGRES_USER:-clinica_user}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-clinica_password}
       POSTGRES_DB: ${POSTGRES_DB:-clinica_db}
-    # Puertos cerrados al host por seguridad (P0-4). Postgres solo es alcanzable dentro de la red interna de Docker.
-    # ports:
-    #   - "5432:5432"
+    # Puerto 5432 expuesto al host para conexión con herramientas de escritorio (DBeaver, pgAdmin)
+    ports:
+      - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     restart: unless-stopped
