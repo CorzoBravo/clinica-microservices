@@ -7,9 +7,9 @@ const app = express();
 // CORS configurado centralizadamente en el API Gateway
 app.use(cors());
 
-const PORT = process.env.PORT || 3000;
-const USER_SERVICE_URL = process.env.USER_SERVICE_URL || 'http://localhost:3001';
-const APPOINTMENT_SERVICE_URL = process.env.APPOINTMENT_SERVICE_URL || 'http://localhost:8000';
+const PORT = Number(process.env.PORT) || 3000;
+const USER_SERVICE_URL = process.env.USER_SERVICE_URL || 'http://user-service:3001';
+const APPOINTMENT_SERVICE_URL = process.env.APPOINTMENT_SERVICE_URL || 'http://appointment-service:8000';
 
 // Proxy para microservicio de Usuarios
 app.use('/api/users', createProxyMiddleware({
@@ -18,9 +18,9 @@ app.use('/api/users', createProxyMiddleware({
   pathRewrite: {
     '^/api/users': ''
   },
-  onError: (err, req, res) => {
+  onError: (err: any, req: any, res: any) => {
     console.error(`[API Gateway] Error comunicando con user-service: ${err.message}`);
-    (res as Response).status(502).json({
+    res.status(502).json({
       error: 'Servicio no disponible (502 Bad Gateway)',
       message: 'No se pudo conectar con el servicio de usuarios'
     });
@@ -34,9 +34,9 @@ app.use('/api/appointments', createProxyMiddleware({
   pathRewrite: {
     '^/api/appointments': ''
   },
-  onError: (err, req, res) => {
+  onError: (err: any, req: any, res: any) => {
     console.error(`[API Gateway] Error comunicando con appointment-service: ${err.message}`);
-    (res as Response).status(502).json({
+    res.status(502).json({
       error: 'Servicio no disponible (502 Bad Gateway)',
       message: 'No se pudo conectar con el servicio de citas'
     });
@@ -47,10 +47,8 @@ app.get('/health', (req: Request, res: Response) => {
   res.json({ status: 'API Gateway (TypeScript) is up and running' });
 });
 
-if (require.main === module) {
-  app.listen(PORT, () => {
-    console.log(`API Gateway escuchando en el puerto ${PORT}`);
-  });
-}
+app.listen(PORT, '0.0.0.0', () => {
+  console.log(`API Gateway escuchando en el puerto ${PORT}`);
+});
 
 export default app;

@@ -5,7 +5,6 @@ import { errorHandler } from './middlewares/error.middleware';
 
 const app = express();
 
-// CORS se delega exclusivamente al API Gateway en el borde para evitar cabeceras duplicadas
 app.use(express.json());
 
 // Rutas
@@ -19,12 +18,10 @@ app.get('/health', (req, res) => {
 // Manejo de errores centralizado
 app.use(errorHandler);
 
-const PORT = process.env.PORT || 3001;
+const PORT = Number(process.env.PORT) || 3001;
 
-if (require.main === module) {
-  app.listen(PORT, () => {
-    console.log(`User Service escuchando en el puerto ${PORT}`);
-  });
-}
+app.listen(PORT, '0.0.0.0', () => {
+  console.log(`User Service escuchando en el puerto ${PORT}`);
+});
 
 export default app;

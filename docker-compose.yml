@@ -4,7 +4,7 @@ services:
     container_name: clinica-postgres
     environment:
       POSTGRES_USER: ${POSTGRES_USER:-clinica_user}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-clinica_password_secure_2026}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-clinica_password}
       POSTGRES_DB: ${POSTGRES_DB:-clinica_db}
     # Puertos cerrados al host por seguridad (P0-4). Postgres solo es alcanzable dentro de la red interna de Docker.
     # ports:
@@ -19,7 +19,7 @@ services:
     container_name: clinica-user-service
     environment:
       - PORT=3001
-      - DATABASE_URL=postgresql://${POSTGRES_USER:-clinica_user}:${POSTGRES_PASSWORD:-clinica_password_secure_2026}@postgres:5432/${POSTGRES_DB:-clinica_db}?schema=public
+      - DATABASE_URL=postgresql://${POSTGRES_USER:-clinica_user}:${POSTGRES_PASSWORD:-clinica_password}@postgres:5432/${POSTGRES_DB:-clinica_db}?schema=public
       - JWT_SECRET=${JWT_SECRET:-clinica_jwt_secret_key_change_in_production_2026_super_secure}
       - NODE_ENV=${NODE_ENV:-production}
     # Puerto interno (P0-4): Todo el tráfico debe ingresar únicamente a través del api-gateway
@@ -52,7 +52,7 @@ services:
     container_name: clinica-appointment-service
     environment:
       - PORT=8000
-      - DATABASE_URL=postgresql://${POSTGRES_USER:-clinica_user}:${POSTGRES_PASSWORD:-clinica_password_secure_2026}@postgres:5432/${POSTGRES_DB:-clinica_db}?schema=appointments
+      - DATABASE_URL=postgresql://${POSTGRES_USER:-clinica_user}:${POSTGRES_PASSWORD:-clinica_password}@postgres:5432/${POSTGRES_DB:-clinica_db}?schema=appointments
       - JWT_SECRET=${JWT_SECRET:-clinica_jwt_secret_key_change_in_production_2026_super_secure}
       - NODE_ENV=${NODE_ENV:-production}
     # Puerto interno (P0-4): Solo accesible a través del api-gateway
